@@ -1,0 +1,41 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog id="GoodsIssueDialog" title="{i18n>lblResItems}">
+		<Table id="tbMatdoclines" items="{oMatdocModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
+			backgroundDesign="Transparent" mode="MultiSelect" sticky="ColumnHeaders">
+			<columns>
+				<Column demandPopin="false" width="6rem">
+					<Text text="{i18n>lblResNo}"/>
+				</Column>
+				<Column demandPopin="false" width="5rem">
+					<Text text="{i18n>lblMaterial}"/>
+				</Column>
+				<Column demandPopin="false" width="4rem">
+					<Text text="{i18n>lblStLoc}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet">
+					<Text text="{i18n>lblBatch}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet">
+					<Text text="{i18n>lblQty}"/>
+				</Column>
+			</columns>
+			<items>
+				<ColumnListItem>
+					<cells>
+						<Text text="{oMatdocModel>ReservNo}"/>
+						<Text text="{oMatdocModel>Material}"/>
+						<Text text="{oMatdocModel>StgeLoc}"/>
+						<Input value="{oMatdocModel>Batch}"/>
+						<Input value="{oMatdocModel>EntryQnt}" type="Number"/>
+					</cells>
+				</ColumnListItem>
+			</items>
+		</Table>
+		<beginButton>
+			<Button text="{i18n>lblPost}" type="Emphasized" press="onPostMatdoc"></Button>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>lblClose}" press="onCloseGoodsIssueDialog"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

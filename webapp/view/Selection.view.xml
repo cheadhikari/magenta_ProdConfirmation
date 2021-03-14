@@ -1,0 +1,61 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form"
+	controllerName="com.magenta_ProdConfirmation.controller.Selection" xmlns:html="http://www.w3.org/1999/xhtml">
+	<Page title="{i18n>tiSelection}">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+					<Label text="{i18n>lblPlant}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<MultiInput id="miPlant" suggestionItems="{ path: 'oModel>/PlantSearchSet', sorter: { path: 'Werks' } }"
+						valueHelpRequest="handlePlantValueHelp">
+						<core:Item key="{oModel>Werks}" text="{oModel>Werks}-{oModel>Name1}"/>
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</MultiInput>
+					<Label text="{i18n>lblProdLine}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<MultiInput id="miProdline"
+						suggestionItems="{ path: 'oModel>/ProdlineSearchSet', sorter: [{ path: 'Werks', descending: false }, { path: 'Stand', descending: false }] }"
+						valueHelpRequest="handleProdlineValueHelp">
+						<core:Item key="{oModel>Stand}" text="{oModel>Stand}-{oModel>Ktext}"/>
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</MultiInput>
+					<Label text="{i18n>lblSupervisor}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<MultiInput id="miSupervisor"
+						suggestionItems="{ path: 'oModel>/SupervisorSearchSet', sorter: [{ path: 'Werks', descending: false }, { path: 'Fevor', descending: false }] }"
+						valueHelpRequest="handleSupervisorValueHelp">
+						<core:Item key="{oModel>Fevor}" text="{oModel>Fevor}-{oModel>Txt}"/>
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</MultiInput>
+					<Label text="{i18n>lblDate}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<DateRangeSelection id="drsDate"></DateRangeSelection>
+				</f:SimpleForm>
+			</VBox>
+		</content>
+		<footer>
+			<OverflowToolbar>
+				<ToolbarSpacer/>
+				<Button text="{i18n>lblSearch}" type="Emphasized" press="onSearch"/>
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>
