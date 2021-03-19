@@ -1,0 +1,141 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout" xmlns:f="sap.ui.layout.form">
+	<Dialog id="MoreInfoDialog" title="{i18n>lblAddInfo}">
+		<VBox class="sapUiSmallMargin">
+			<f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+				<Label text="{i18n>lblPlant}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Plant}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblProdLine}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Prodline}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblSupervisor}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Supervisor}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblStartDate}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{ path: 'oProdOrdModel>Startdate' , type: 'sap.ui.model.type.Date' , formatOptions: { style: 'medium' } }">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblFinishDate}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{ path: 'oProdOrdModel>Finishdate' , type: 'sap.ui.model.type.Date' , formatOptions: { style: 'medium' } }">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblResource}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Resrc}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblPhase}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Phase}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblOrdType}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Ordtype}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblMaterial}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Matcode}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblSoNo}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Sono}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblSoItem}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Soitem}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblBatch}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Batch}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+				<Label text="{i18n>lblNoEmp}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Label>
+				<Text text="{oProdOrdModel>Noemp}">
+					<layoutData>
+						<l:GridData span="XL3 L3 M3 S6"/>
+					</layoutData>
+				</Text>
+			</f:SimpleForm>
+		</VBox>
+		<endButton>
+			<Button text="{i18n>lblClose}" press="onCloseMoreInfoDialog"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

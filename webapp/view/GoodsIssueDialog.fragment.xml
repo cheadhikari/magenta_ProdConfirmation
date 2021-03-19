@@ -3,14 +3,17 @@
 		<Table id="tbMatdoclines" items="{oMatdocModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
 			backgroundDesign="Transparent" mode="MultiSelect" sticky="ColumnHeaders">
 			<columns>
-				<Column demandPopin="false" width="6rem">
-					<Text text="{i18n>lblResNo}"/>
-				</Column>
-				<Column demandPopin="false" width="5rem">
-					<Text text="{i18n>lblMaterial}"/>
+				<Column demandPopin="false">
+					<Text text="{i18n>lblMatDesc}"/>
 				</Column>
 				<Column demandPopin="false" width="4rem">
 					<Text text="{i18n>lblStLoc}"/>
+				</Column>
+				<Column demandPopin="false" width="5rem" hAlign="End">
+					<Text text="{i18n>lblReqQty}"/>
+				</Column>
+				<Column demandPopin="false" width="5rem" hAlign="End">
+					<Text text="{i18n>lblWithQty}"/>
 				</Column>
 				<Column demandPopin="true" minScreenWidth="Tablet">
 					<Text text="{i18n>lblBatch}"/>
@@ -22,11 +25,12 @@
 			<items>
 				<ColumnListItem>
 					<cells>
-						<Text text="{oMatdocModel>ReservNo}"/>
-						<Text text="{oMatdocModel>Material}"/>
+						<Text text="{oMatdocModel>Matdesc}"/>
 						<Text text="{oMatdocModel>StgeLoc}"/>
+						<Text text="{oMatdocModel>Reqqty}"/>
+						<Text text="{oMatdocModel>Withqty}"/>
 						<Input value="{oMatdocModel>Batch}"/>
-						<Input value="{oMatdocModel>EntryQnt}" type="Number"/>
+						<Input value="{oMatdocModel>EntryQnt}" type="Number" textAlign="End"/>
 					</cells>
 				</ColumnListItem>
 			</items>

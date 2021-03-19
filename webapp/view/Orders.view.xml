@@ -8,41 +8,26 @@
 					<Column demandPopin="false" width="5rem">
 						<Text text="{i18n>lblOrdno}"/>
 					</Column>
-					<Column demandPopin="false">
-						<Text text="{i18n>lblPlant}"/>
+					<Column demandPopin="true" minScreenWidth="Desktop" width="6.5rem">
+						<Text text="{i18n>lblOperation}"/>
 					</Column>
-					<Column demandPopin="false" width="4rem">
-						<Text text="{i18n>lblResource}"/>
-					</Column>
-					<Column demandPopin="false">
-						<Text text="{i18n>lblPhase}"/>
-					</Column>
-					<Column demandPopin="false">
-						<Text text="{i18n>lblOrdType}"/>
-					</Column>
-					<Column demandPopin="true" minScreenWidth="Desktop">
-						<Text text="{i18n>lblMaterial}"/>
-					</Column>
-					<Column demandPopin="true" minScreenWidth="Desktop">
+					<Column demandPopin="true" minScreenWidth="70rem">
 						<Text text="{i18n>lblMatDesc}"/>
 					</Column>
-					<Column demandPopin="true" minScreenWidth="Desktop">
-						<Text text="{i18n>lblBatch}"/>
-					</Column>
-					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+					<Column demandPopin="true" minScreenWidth="70rem" hAlign="End" width="5rem">
 						<Text text="{i18n>lblOrdQty}"/>
 					</Column>
-					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+					<Column demandPopin="true" minScreenWidth="70rem" hAlign="End" width="5rem">
 						<Text text="{i18n>lblConfQty}"/>
 					</Column>
-					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
+					<Column demandPopin="true" minScreenWidth="70rem" hAlign="End" width="5rem">
 						<Text text="{i18n>lblToBeProd}"/>
+					</Column>
+					<Column demandPopin="false" width="3rem">
+						<Text text="{i18n>lblUom}"/>
 					</Column>
 					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
 						<Text text="{i18n>lblYield}"/>
-					</Column>
-					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
-						<Text text="{i18n>lblRework}"/>
 					</Column>
 					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
 						<Text text="{i18n>lblScrap}"/>
@@ -50,29 +35,28 @@
 					<Column demandPopin="true" minScreenWidth="Tablet">
 						<Text text="{i18n>lblScrapReason}"/>
 					</Column>
-					<Column demandPopin="true" minScreenWidth="Tablet">
+					<Column demandPopin="true" minScreenWidth="Tablet" width="9rem">
 						<Text text="{i18n>lblProdDate}"/>
 					</Column>
+					<Column demandPopin="false" width="3rem"></Column>
 				</columns>
 				<items>
 					<ColumnListItem>
 						<cells>
 							<ObjectIdentifier title="{oProdOrdModel>Ordno}"/>
-							<Text text="{oProdOrdModel>Plant}"/>
-							<Text text="{oProdOrdModel>Resrc}"/>
-							<Text text="{oProdOrdModel>Phase}"/>
-							<Text text="{oProdOrdModel>Ordtype}"/>
-							<Text text="{oProdOrdModel>Matcode}"/>
+							<Text text="{oProdOrdModel>Operation}"/>
 							<Text text="{oProdOrdModel>Matdesc}"/>
-							<Text text="{oProdOrdModel>Batch}"/>
 							<Text text="{oProdOrdModel>Ordqty}"/>
 							<Text text="{oProdOrdModel>Confqty}"/>
 							<Text text="{oProdOrdModel>Tobeprod}"/>
+							<Text text="{oProdOrdModel>Uom}"/>
 							<Input value="{oProdOrdModel>Yield}" type="Number" textAlign="End"/>
-							<Input value="{oProdOrdModel>Rework}" type="Number" textAlign="End"/>
 							<Input value="{oProdOrdModel>Scrap}" type="Number" textAlign="End"/>
-							<Input value="{oProdOrdModel>Scraprsn}"/>
-							<DatePicker value="{oProdOrdModel>Proddate}" displayFormat="dd/MM/yyyy"/>
+							<Input id="inScrapRsn" value="{oProdOrdModel>Scraprsn}" showValueHelp="true" showSuggestion="true" valueHelpOnly="true"
+								valueHelpRequest="handleScrapReasonValueHelp"/>
+							<DatePicker
+								value="{path: 'oProdOrdModel>Proddate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'dd/MM/yyyy', strictParsing: true , UTC: true}}"/>
+							<Button icon="sap-icon://overflow" press="onMorePress"/>
 						</cells>
 					</ColumnListItem>
 				</items>

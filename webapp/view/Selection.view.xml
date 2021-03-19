@@ -4,6 +4,17 @@
 		<content>
 			<VBox class="sapUiSmallMargin">
 				<f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+					<Label text="{i18n>lblOrderNo}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<MultiComboBox id="mcbOrderNo" items="{ path: 'oModel>/OrderNumbersSet', sorter: { path: 'Ordno' } }">
+						<core:Item key="{oModel>Ordno}" text="{oModel>Ordno}"/>
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</MultiComboBox>
 					<Label text="{i18n>lblPlant}">
 						<layoutData>
 							<l:GridData span="XL2 L2 M2 S4"/>
@@ -47,7 +58,11 @@
 							<l:GridData span="XL2 L2 M2 S4"/>
 						</layoutData>
 					</Label>
-					<DateRangeSelection id="drsDate"></DateRangeSelection>
+					<DateRangeSelection id="drsDate">
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</DateRangeSelection>
 				</f:SimpleForm>
 			</VBox>
 		</content>

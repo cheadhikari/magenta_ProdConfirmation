@@ -166,7 +166,24 @@ sap.ui.define([
 		},
 
 		onSearch: function(oEvent) {
+			
+			var mcbOrderNo = this.byId("mcbOrderNo");
+			var aOrdno = mcbOrderNo.getSelectedItems();
+			var sOrdno = "-";
 
+			if (aOrdno && sOrdno.length) {
+				aOrdno.forEach(function(oItem) {
+
+					if (sOrdno === "-") {
+						sOrdno = oItem.getText();
+					} else {
+						sOrdno = sOrdno + "|" + oItem.getText();
+					}
+
+				});
+			}
+			
+			
 			var miPlant = this.byId("miPlant");
 			var aPlants = miPlant.getTokens();
 			var sPlants = "-";
@@ -218,15 +235,17 @@ sap.ui.define([
 			var drsDate = this.byId("drsDate");
 			var sDate = "-";
 			var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({
-				pattern: "yyyy.MM.dd"
+				pattern: "yyyy.MM.dd",
+				UTC: false
 			});
 			var sFromDate = oDateFormat.format(drsDate.getDateValue());
 			var sToDate = oDateFormat.format(drsDate.getSecondDateValue());
 			if (sFromDate && sToDate) {
 				sDate = sFromDate + "|" + sToDate;
 			}
-
+			
 			this._getRouter().navTo("Orders", {
+				Ordno: sOrdno,
 				Plant: sPlants,
 				Prodline: sProdlines,
 				Supervisor: sSupervisors,

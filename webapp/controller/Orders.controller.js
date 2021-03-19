@@ -17,6 +17,7 @@ sap.ui.define([
 		_onItemMatched: function(oEvent) {
 
 			var oArgs = oEvent.getParameter("arguments");
+			this._pOrdno = oArgs.Ordno;
 			this._pPlant = oArgs.Plant;
 			this._pProdline = oArgs.Prodline;
 			this._pSupervisor = oArgs.Supervisor;
@@ -55,6 +56,13 @@ sap.ui.define([
 			return aResult;
 		},
 
+		_getIndexFromPath: function(oPath) {
+
+			var iIndex = parseInt(oPath.substring(oPath.lastIndexOf('/') + 1), 10);
+
+			return iIndex;
+		},
+
 		_readProdOrders: function(oTable) {
 
 			var oView = this.getView();
@@ -62,8 +70,16 @@ sap.ui.define([
 			oTable.setBusy(true);
 
 			var aFilters = [];
+			if (this._pOrdno !== "-") {
+				var aSplit = this._getParamters(this._pOrdno);
+				aSplit.forEach(function(oItem) {
+					var oFilter = new Filter("Ordno", FilterOperator.EQ, oItem);
+					aFilters.push(oFilter);
+				});
+
+			}
 			if (this._pPlant !== "-") {
-				var aSplit = this._getParamters(this._pPlant);
+				aSplit = this._getParamters(this._pPlant);
 				aSplit.forEach(function(oItem) {
 					var oFilter = new Filter("Plant", FilterOperator.EQ, oItem);
 					aFilters.push(oFilter);
@@ -107,17 +123,18 @@ sap.ui.define([
 			});
 		},
 
-		_readMatdocitems: function(sOrderid, oTable) {
+		_readMatdocitems: function(sOrderid, sPhase, oTable) {
 
 			var oView = this.getView();
 			var oModel = oView.getModel("oModel");
 			oTable.setBusy(true);
 
-			var oFilter = new Filter("Orderid", FilterOperator.EQ, sOrderid);
+			var oFilter1 = new Filter("Orderid", FilterOperator.EQ, sOrderid);
+			var oFilter2 = new Filter("Phase", FilterOperator.EQ, sPhase);
 
 			return new Promise(function(resolve, reject) {
 				oModel.read("/MatdocitemSet", {
-					filters: [oFilter],
+					filters: [oFilter1, oFilter2],
 					success: function(oResult) {
 						resolve(oResult);
 						oTable.setBusy(false);
@@ -125,6 +142,29 @@ sap.ui.define([
 					error: function(oError) {
 						reject(oError);
 						oTable.setBusy(false);
+					}
+				});
+			});
+		},
+
+		_readScrapReasons: function(sPlant) {
+
+			var oView = this.getView();
+			var oModel = oView.getModel("oModel");
+			oView.setBusy(true);
+
+			var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
+
+			return new Promise(function(resolve, reject) {
+				oModel.read("/ScrapReasonSet", {
+					filters: [oFilter],
+					success: function(oResult) {
+						resolve(oResult);
+						oView.setBusy(false);
+					},
+					error: function(oError) {
+						reject(oError);
+						oView.setBusy(false);
 					}
 				});
 			});
@@ -153,6 +193,10 @@ sap.ui.define([
 
 					var sSMessage = that._geti18nText("msgSMatDocPosted") + " : " + oResult.Matdoc + "/" + oResult.Matyear;
 					MessageBox.success(sSMessage);
+
+					that._pGoodsIssueDialog.then(function(oDialog) {
+						oDialog.close();
+					});
 				},
 				error: function(oError) {
 					oTable.setBusy(false);
@@ -189,8 +233,9 @@ sap.ui.define([
 			var that = this;
 			oModel.create("/ProdOrdersSet", oData, {
 				success: function(oResult) {
+
 					oView.setBusy(false);
-					var sSMessage = that._geti18nText("msgSOrderConfirmed");
+					var sSMessage = that._geti18nText("msgSOrderConfirmed") + " : " + oResult.Ordno;
 					MessageBox.success(sSMessage);
 
 					var oProdOrders = that._readProdOrders(oTable);
@@ -317,7 +362,6 @@ sap.ui.define([
 			}
 
 			var tbOrders = this.byId("tbOrders");
-			var aOrders = [];
 			var aSelected = tbOrders.getSelectedContexts();
 
 			if (aSelected.length === 0) {
@@ -325,22 +369,20 @@ sap.ui.define([
 				return;
 			}
 
-			aSelected.forEach(function(oItem) {
-				aOrders.push(oItem.getObject().Ordno);
-			});
-
-			aOrders = this._removeDuplicates(aOrders);
-
-			if (aOrders.length > 1) {
-				MessageBox.error(this._geti18nText("msgEMultipleOrders"));
+			if (aSelected.length > 1) {
+				MessageBox.error(this._geti18nText("msgEMultipleItems"));
 				return;
 			}
 
 			var tbMatdoclines = this.byId("tbMatdoclines");
-			var oMatdocitems = this._readMatdocitems(aOrders[0], tbMatdoclines);
+			var oObject = aSelected[0].getObject();
+			var sOrderid = oObject.Ordno;
+			var sPhase = oObject.Phase;
+
+			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, tbMatdoclines);
+			console.log(oMatdocitems);
 
 			oMatdocitems.then(function(oResult) {
-
 				var oMatdocModel = new JSONModel(oResult);
 				tbMatdoclines.setModel(oMatdocModel, "oMatdocModel");
 			});
@@ -385,21 +427,7 @@ sap.ui.define([
 					bQty = true;
 				}
 
-				var oItem = {
-					Orderid: oObj.Orderid,
-					OrderItno: oObj.OrderItno,
-					ReservNo: oObj.ReservNo,
-					ResItem: oObj.ResItem,
-					Material: oObj.Material,
-					Plant: oObj.Plant,
-					StgeLoc: oObj.StgeLoc,
-					Batch: oObj.Batch,
-					MoveType: oObj.MoveType,
-					EntryUom: oObj.EntryUom,
-					EntryQnt: oObj.EntryQnt
-				};
-
-				aMatDocitems.push(oItem);
+				aMatDocitems.push(oObj);
 			});
 
 			if (bBatch) {
@@ -437,16 +465,125 @@ sap.ui.define([
 				return;
 			}
 
+			if (ProdOrder.Scrap > 0 && !ProdOrder.Scraprsn) {
+				MessageBox.error(this._geti18nText("msgEBlankScrapReason"));
+				return;
+			}
+
 			if (!ProdOrder.Proddate) {
 				ProdOrder.Proddate = new Date();
 			}
 
-			this._postConfirmation(ProdOrder,oTable);
+			this._postConfirmation(ProdOrder, oTable);
+
+		},
+
+		handleScrapReasonValueHelp: function(oEvent) {
+
+			this._pinScrapRsn = oEvent.getSource().getId();
+
+			var oButton = oEvent.getSource();
+			var oBindingContext = oButton.getBindingContext("oProdOrdModel");
+			var oBindingObject = oBindingContext.getObject();
+
+			var oView = this.getView();
+			if (!this._pScrapReasonDialog) {
+				this._pScrapReasonDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.ScrapReasonValueHelpDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			var sPlant = oBindingObject.Plant;
+			var oScrapRsn = this._readScrapReasons(sPlant);
+
+			var that = this;
+			oScrapRsn.then(function(oResult) {
+				var oScrapRsnModel = new JSONModel(oResult);
+				that._pScrapReasonDialog.then(function(oDialog) {
+					oDialog.setModel(oScrapRsnModel, "oScrapRsnModel");
+					oDialog.open();
+				});
+			});
+
+			oScrapRsn.catch(function(oError) {
+				return;
+			});
+
+		},
+
+		handleScrapReasonSearch: function(oEvent) {
+			var sValue = oEvent.getParameter("value");
+			var oFilter1 = new Filter("Plant", FilterOperator.Contains, sValue);
+			var oFilter2 = new Filter("Rsncode", FilterOperator.Contains, sValue);
+			var oFilter3 = new Filter("Rsntext", FilterOperator.Contains, sValue);
+			var aFilter = new Filter([oFilter1, oFilter2, oFilter3], false);
+			var oBinding = oEvent.getSource().getBinding("items");
+			oBinding.filter(aFilter);
+		},
+
+		handleScrapReasonClose: function(oEvent) {
+
+			var oItem = oEvent.getParameter("selectedItem");
+			var oContext = oItem.getBindingContext("oScrapRsnModel");
+			var oObject = oContext.getObject();
+
+			if (this._pinScrapRsn) {
+				var oInput = sap.ui.getCore().getElementById(this._pinScrapRsn);
+				oInput.setValue(oObject.Rsncode);
+			}
+
+		},
+
+		onMorePress: function(oEvent) {
+
+			var oButton = oEvent.getSource();
+			var oBindingContext = oButton.getBindingContext("oProdOrdModel");
+			var oBindingObject = oBindingContext.getObject();
+
+			var aProdOrd = [];
+			aProdOrd.push(oBindingObject);
+			var oProdOrdModel = new JSONModel(aProdOrd);
+
+			var oView = this.getView();
+
+			if (!this._pMoreInfoDialog) {
+				this._pMoreInfoDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.MoreInfoDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			this._pMoreInfoDialog.then(function(oDialog) {
+
+				oDialog.setModel(oProdOrdModel, "oProdOrdModel");
+				oDialog.bindElement({
+					path: "/0",
+					model: "oProdOrdModel"
+
+				});
+
+				oDialog.open();
+			});
 
 		},
 
 		onCloseGoodsIssueDialog: function() {
 			this._pGoodsIssueDialog.then(function(oDialog) {
+				oDialog.close();
+			});
+		},
+
+		onCloseMoreInfoDialog: function() {
+			this._pMoreInfoDialog.then(function(oDialog) {
 				oDialog.close();
 			});
 		}
