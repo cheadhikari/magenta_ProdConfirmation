@@ -166,7 +166,7 @@ sap.ui.define([
 		},
 
 		onSearch: function(oEvent) {
-			
+
 			var mcbOrderNo = this.byId("mcbOrderNo");
 			var aOrdno = mcbOrderNo.getSelectedItems();
 			var sOrdno = "-";
@@ -182,8 +182,7 @@ sap.ui.define([
 
 				});
 			}
-			
-			
+
 			var miPlant = this.byId("miPlant");
 			var aPlants = miPlant.getTokens();
 			var sPlants = "-";
@@ -243,7 +242,7 @@ sap.ui.define([
 			if (sFromDate && sToDate) {
 				sDate = sFromDate + "|" + sToDate;
 			}
-			
+
 			this._getRouter().navTo("Orders", {
 				Ordno: sOrdno,
 				Plant: sPlants,

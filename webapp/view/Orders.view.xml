@@ -38,6 +38,9 @@
 					<Column demandPopin="true" minScreenWidth="Tablet" width="9rem">
 						<Text text="{i18n>lblProdDate}"/>
 					</Column>
+					<Column demandPopin="true" minScreenWidth="Tablet" width="3rem">
+						<Text text="{i18n>lblFinalConf}"/>
+					</Column>
 					<Column demandPopin="false" width="3rem"></Column>
 				</columns>
 				<items>
@@ -52,10 +55,13 @@
 							<Text text="{oProdOrdModel>Uom}"/>
 							<Input value="{oProdOrdModel>Yield}" type="Number" textAlign="End"/>
 							<Input value="{oProdOrdModel>Scrap}" type="Number" textAlign="End"/>
-							<Input id="inScrapRsn" value="{oProdOrdModel>Scraprsn}" showValueHelp="true" showSuggestion="true" valueHelpOnly="true"
-								valueHelpRequest="handleScrapReasonValueHelp"/>
+							<Input id="inScrapRsn" value="{oProdOrdModel>Scraprsn}" showValueHelp="true" showSuggestion="true"
+								valueHelpRequest="handleScrapReasonValueHelp">
+								<core:Item key="{oProdOrdModel>Scraprsn}" text="{oProdOrdModel>Scraprsn}"/>
+							</Input>
 							<DatePicker
 								value="{path: 'oProdOrdModel>Proddate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'dd/MM/yyyy', strictParsing: true , UTC: true}}"/>
+							<CheckBox selected="{oProdOrdModel>Finalconf}"/>
 							<Button icon="sap-icon://overflow" press="onMorePress"/>
 						</cells>
 					</ColumnListItem>

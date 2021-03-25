@@ -104,7 +104,7 @@ sap.ui.define([
 				aSplit = this._getParamters(this._pDate);
 				var oSDate = new Date(aSplit[0]);
 				var oEDate = new Date(aSplit[1]);
-				var oFilter = new Filter("Proddate", FilterOperator.BT, oSDate, oEDate);
+				var oFilter = new Filter("Finishdate", FilterOperator.BT, oSDate, oEDate);
 				aFilters.push(oFilter);
 			}
 
@@ -380,7 +380,6 @@ sap.ui.define([
 			var sPhase = oObject.Phase;
 
 			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, tbMatdoclines);
-			console.log(oMatdocitems);
 
 			oMatdocitems.then(function(oResult) {
 				var oMatdocModel = new JSONModel(oResult);
@@ -411,17 +410,11 @@ sap.ui.define([
 			}
 
 			var aMatDocitems = [];
-
-			var bBatch = false;
 			var bQty = false;
 
 			aSelected.forEach(function(oLine) {
 
 				var oObj = oLine.getObject();
-
-				if (!oObj.Batch) {
-					bBatch = true;
-				}
 
 				if (!oObj.EntryQnt) {
 					bQty = true;
@@ -429,11 +422,6 @@ sap.ui.define([
 
 				aMatDocitems.push(oObj);
 			});
-
-			if (bBatch) {
-				MessageBox.error(this._geti18nText("msgEBlankBatch"));
-				return;
-			}
 
 			if (bQty) {
 				MessageBox.error(this._geti18nText("msgEBlankQty"));
@@ -460,13 +448,26 @@ sap.ui.define([
 
 			var ProdOrder = aSelected[0].getObject();
 
-			if (ProdOrder.Yield === "0.00") {
+			if (ProdOrder.Yield === "" || ProdOrder.Yield === "0") {
+				ProdOrder.Yield = "0.00";
+			}
+
+			if (ProdOrder.Scrap === "" || ProdOrder.Scrap === "0") {
+				ProdOrder.Scrap = "0.00";
+			}
+
+			if (ProdOrder.Yield === "0.00" && ProdOrder.Scrap === "0.00" && !ProdOrder.Scraprsn) {
 				MessageBox.error(this._geti18nText("msgEBlankYield"));
 				return;
 			}
 
 			if (ProdOrder.Scrap > 0 && !ProdOrder.Scraprsn) {
 				MessageBox.error(this._geti18nText("msgEBlankScrapReason"));
+				return;
+			}
+
+			if (ProdOrder.Scrap === "0.00" && ProdOrder.Scraprsn) {
+				MessageBox.error(this._geti18nText("msgEBlankScrap"));
 				return;
 			}
 
