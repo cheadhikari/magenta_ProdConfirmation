@@ -40,19 +40,19 @@
 							<l:GridData span="XL10 L10 M10 S8"/>
 						</layoutData>
 					</MultiInput>
-					<!--<Label text="{i18n>lblResource}">-->
-					<!--	<layoutData>-->
-					<!--		<l:GridData span="XL2 L2 M2 S4"/>-->
-					<!--	</layoutData>-->
-					<!--</Label>-->
-					<!--<MultiInput id="miResource"-->
-					<!--	suggestionItems="{ path: 'oModel>/ResoruceSearchSet', sorter: [{ path: 'Werks', descending: false }, { path: 'Stand', descending: false }] }"-->
-					<!--	valueHelpRequest="handleResourceValueHelp">-->
-					<!--	<core:Item key="{oModel>Stand}" text="{oModel>Stand}-{oModel>Ktext}"/>-->
-					<!--	<layoutData>-->
-					<!--		<l:GridData span="XL10 L10 M10 S8"/>-->
-					<!--	</layoutData>-->
-					<!--</MultiInput>-->
+					<Label text="{i18n>lblResource}">
+						<layoutData>
+							<l:GridData span="XL2 L2 M2 S4"/>
+						</layoutData>
+					</Label>
+					<MultiInput id="miResource"
+						suggestionItems="{ path: 'oModel>/ResourceSearchSet', sorter: [{ path: 'Resrc', descending: false }] }"
+						valueHelpRequest="handleResourceValueHelp">
+						<core:Item key="{oModel>Resrc}" text="{oModel>Resrc}"/>
+						<layoutData>
+							<l:GridData span="XL10 L10 M10 S8"/>
+						</layoutData>
+					</MultiInput>
 					<Label text="{i18n>lblSupervisor}">
 						<layoutData>
 							<l:GridData span="XL2 L2 M2 S4"/>

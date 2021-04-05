@@ -2,12 +2,50 @@ sap.ui.define([
 	"com/magenta_ProdConfirmation/controller/BaseController",
 	"sap/ui/core/Fragment",
 	'sap/m/Token',
+	"sap/ui/model/json/JSONModel",
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator"
-], function(Controller, Fragment, Token, Filter, FilterOperator) {
+], function(Controller, Fragment, Token, JSONModel, Filter, FilterOperator) {
 	"use strict";
 
 	return Controller.extend("com.magenta_ProdConfirmation.controller.Selection", {
+
+		/*
+			Helper Methods
+		*/
+		_readResources: function(aPlants) {
+
+			var oView = this.getView();
+			var oModel = oView.getModel("oModel");
+			oView.setBusy(true);
+
+			var aFilter = [];
+
+			if (aPlants && aPlants.length) {
+				aPlants.forEach(function(oItem) {
+					var oFilter = new Filter("Plant", FilterOperator.EQ, oItem.getKey());
+					aFilter.push(oFilter);
+				});
+			}
+
+			return new Promise(function(resolve, reject) {
+				oModel.read("/ResourceSearchSet", {
+					filters: aFilter,
+					success: function(oResult) {
+						resolve(oResult);
+						oView.setBusy(false);
+					},
+					error: function(oError) {
+						reject(oError);
+						oView.setBusy(false);
+					}
+				});
+			});
+		},
+
+		/*
+			Events
+		*/
 
 		onInit: function() {
 
@@ -47,6 +85,35 @@ sap.ui.define([
 			});
 		},
 
+		handleResourceValueHelp: function(oEvent) {
+			var oView = this.getView();
+			if (!this._pResourceDialog) {
+				this._pResourceDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.ResourceValueHelpDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			var miPlant = this.byId("miPlant");
+			var aPlants = miPlant.getTokens();
+
+			var oResources = this._readResources(aPlants);
+
+			var that = this;
+			oResources.then(function(oResult) {
+				var oResourcesModel = new JSONModel(oResult);
+				that._pResourceDialog.then(function(oDialog) {
+					oDialog.setModel(oResourcesModel, "oResourcesModel");
+					oDialog.open();
+				});
+			});
+
+		},
+
 		handleSupervisorValueHelp: function(oEvent) {
 			var oView = this.getView();
 			if (!this._pSupervisorDialog) {
@@ -75,20 +142,24 @@ sap.ui.define([
 
 		handleProdlineSearch: function(oEvent) {
 			var sValue = oEvent.getParameter("value");
-			//var oFilter1 = new Filter("Werks", FilterOperator.Contains, sValue);
-			// var oFilter2 = new Filter("Stand", FilterOperator.Contains, sValue);
-			var oFilter3 = new Filter("Ktext", FilterOperator.Contains, sValue);
-			var aFilter = new Filter([oFilter3], false);
+			var oFilter1 = new Filter("Ktext", FilterOperator.Contains, sValue);
+			var aFilter = new Filter([oFilter1], false);
+			var oBinding = oEvent.getSource().getBinding("items");
+			oBinding.filter(aFilter);
+		},
+
+		handleResourceSearch: function(oEvent) {
+			var sValue = oEvent.getParameter("value");
+			var oFilter1 = new Filter("Resrc", FilterOperator.Contains, sValue);
+			var aFilter = new Filter([oFilter1], false);
 			var oBinding = oEvent.getSource().getBinding("items");
 			oBinding.filter(aFilter);
 		},
 
 		handleSupervisorSearch: function(oEvent) {
 			var sValue = oEvent.getParameter("value");
-			//var oFilter1 = new Filter("Werks", FilterOperator.Contains, sValue);
-			//var oFilter2 = new Filter("Fevor", FilterOperator.Contains, sValue);
-			var oFilter3 = new Filter("Txt", FilterOperator.Contains, sValue);
-			var aFilter = new Filter([oFilter3], false);
+			var oFilter1 = new Filter("Txt", FilterOperator.Contains, sValue);
+			var aFilter = new Filter([oFilter1], false);
 			var oBinding = oEvent.getSource().getBinding("items");
 			oBinding.filter(aFilter);
 		},
@@ -132,6 +203,30 @@ sap.ui.define([
 					var sText = oContext.getObject().Stand + "-" + oContext.getObject().Ktext;
 
 					omiProdline.addToken(new Token({
+						key: sKey,
+						text: sText
+					}));
+
+				});
+
+			}
+		},
+
+		handleResourceClose: function(oEvent) {
+			var miResource = this.byId("miResource");
+
+			var aContexts = oEvent.getParameter("selectedContexts");
+
+			if (aContexts && aContexts.length) {
+
+				miResource.destroyTokens();
+
+				aContexts.forEach(function(oContext) {
+
+					var sKey = oContext.getObject().Resrc;
+					var sText = oContext.getObject().Resrc;
+
+					miResource.addToken(new Token({
 						key: sKey,
 						text: sText
 					}));
@@ -214,6 +309,22 @@ sap.ui.define([
 
 				});
 			}
+			
+			var miResource = this.byId("miResource");
+			var aResources = miResource.getTokens();
+			var sResources = "-";
+
+			if (aResources && aResources.length) {
+				aResources.forEach(function(oItem) {
+
+					if (sResources === "-") {
+						sResources = oItem.getKey();
+					} else {
+						sResources = sResources + "|" + oItem.getKey();
+					}
+
+				});
+			}
 
 			var miSupervisor = this.byId("miSupervisor");
 			var aSupervisors = miSupervisor.getTokens();
@@ -237,8 +348,15 @@ sap.ui.define([
 				pattern: "yyyy.MM.dd",
 				UTC: false
 			});
-			var sFromDate = oDateFormat.format(drsDate.getDateValue());
-			var sToDate = oDateFormat.format(drsDate.getSecondDateValue());
+
+			if (drsDate.getDateValue()) {
+				var sFromDate = oDateFormat.format(drsDate.getDateValue());
+			}
+
+			if (drsDate.getSecondDateValue()) {
+				var sToDate = oDateFormat.format(drsDate.getSecondDateValue());
+			}
+
 			if (sFromDate && sToDate) {
 				sDate = sFromDate + "|" + sToDate;
 			}
@@ -247,6 +365,7 @@ sap.ui.define([
 				Ordno: sOrdno,
 				Plant: sPlants,
 				Prodline: sProdlines,
+				Resource: sResources,
 				Supervisor: sSupervisors,
 				Date: sDate
 			});

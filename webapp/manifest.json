@@ -125,7 +125,7 @@
 				},
 				{
 					"name": "Orders",
-					"pattern": "Orders/{Ordno},{Plant},{Prodline},{Supervisor},{Date}",
+					"pattern": "Orders/{Ordno},{Plant},{Prodline},{Resource},{Supervisor},{Date}",
 					"titleTarget": "",
 					"greedy": false,
 					"target": [

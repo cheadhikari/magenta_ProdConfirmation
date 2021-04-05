@@ -1,0 +1,24 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<TableSelectDialog id="ResourceValueHelpDialog" noDataText="{i18n>lblNoData}" title="{i18n>lblSelectResource}" search=".handleResourceSearch"
+		confirm=".handleResourceClose" cancel=".handleResourceClose" multiSelect="true"
+		items="{ path : 'oResourcesModel>/results', sorter : [{ path: 'Plant', descending: false }, { path: 'Resrc', descending: false }] }">
+		<ColumnListItem>
+			<cells>
+				<ObjectIdentifier title="{oResourcesModel>Plant}"/>
+				<ObjectIdentifier title="{oResourcesModel>Resrc}"/>
+			</cells>
+		</ColumnListItem>
+		<columns>
+			<Column>
+				<header>
+					<Text text="{i18n>lblPlant}"/>
+				</header>
+			</Column>
+			<Column>
+				<header>
+					<Text text="{i18n>lblResource}"/>
+				</header>
+			</Column>
+		</columns>
+	</TableSelectDialog>
+</core:FragmentDefinition>

@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<Dialog id="GoodsIssueDialog" title="{i18n>lblResItems}">
+	<Dialog id="GoodsIssueDialog" title="{i18n>lblLineItems}">
 		<Table id="tbMatdoclines" items="{oMatdocModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
 			backgroundDesign="Transparent" mode="MultiSelect" sticky="ColumnHeaders">
 			<columns>
@@ -33,7 +33,7 @@
 						<Text text="{oMatdocModel>StgeLoc}"/>
 						<Text text="{oMatdocModel>Reqqty}"/>
 						<Text text="{oMatdocModel>Withqty}"/>
-						<Input value="{oMatdocModel>Batch}"/>
+						<Input id="inBatch" value="{oMatdocModel>Batch}" showValueHelp="true" valueHelpRequest="handleBatchValueHelp"/>
 						<Input value="{oMatdocModel>EntryQnt}" type="Number" textAlign="End"/>
 					</cells>
 				</ColumnListItem>

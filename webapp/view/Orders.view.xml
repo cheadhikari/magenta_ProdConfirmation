@@ -1,5 +1,5 @@
-<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" controllerName="com.magenta_ProdConfirmation.controller.Orders"
-	xmlns:html="http://www.w3.org/1999/xhtml">
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:mc="sap.suite.ui.microchart"
+	controllerName="com.magenta_ProdConfirmation.controller.Orders" xmlns:html="http://www.w3.org/1999/xhtml">
 	<Page title="{i18n>tiOrders}" showNavButton="true" navButtonPress="onNavBack">
 		<content>
 			<Table id="tbOrders" items="{oProdOrdModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
@@ -23,7 +23,10 @@
 					<Column demandPopin="true" minScreenWidth="70rem" hAlign="End" width="5rem">
 						<Text text="{i18n>lblToBeProd}"/>
 					</Column>
-					<Column demandPopin="false" width="3rem">
+					<Column demandPopin="false" width="4rem">
+						<Text text="{i18n>lblGIStatus}"/>
+					</Column>
+					<Column demandPopin="true" minScreenWidth="70rem" width="3rem">
 						<Text text="{i18n>lblUom}"/>
 					</Column>
 					<Column demandPopin="true" minScreenWidth="Tablet" hAlign="End">
@@ -52,13 +55,11 @@
 							<Text text="{oProdOrdModel>Ordqty}"/>
 							<Text text="{oProdOrdModel>Confqty}"/>
 							<Text text="{oProdOrdModel>Tobeprod}"/>
+							<mc:RadialMicroChart size="Responsive" height="18px" percentage="{oProdOrdModel>Giprc}" valueColor="{oProdOrdModel>Gicolor}"/>
 							<Text text="{oProdOrdModel>Uom}"/>
 							<Input value="{oProdOrdModel>Yield}" type="Number" textAlign="End"/>
 							<Input value="{oProdOrdModel>Scrap}" type="Number" textAlign="End"/>
-							<Input id="inScrapRsn" value="{oProdOrdModel>Scraprsn}" showValueHelp="true" showSuggestion="true"
-								valueHelpRequest="handleScrapReasonValueHelp">
-								<core:Item key="{oProdOrdModel>Scraprsn}" text="{oProdOrdModel>Scraprsn}"/>
-							</Input>
+							<Input id="inScrapRsn" value="{oProdOrdModel>Scraprsn}" showValueHelp="true" valueHelpRequest="handleScrapReasonValueHelp"/>
 							<DatePicker
 								value="{path: 'oProdOrdModel>Proddate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'dd/MM/yyyy', strictParsing: true , UTC: true}}"/>
 							<CheckBox selected="{oProdOrdModel>Finalconf}"/>
@@ -73,6 +74,7 @@
 				<ToolbarSpacer/>
 				<Button icon="sap-icon://print" text="{i18n>lblPrintLabels}" type="Default" press="onPrintLabelsPress"/>
 				<Button icon="sap-icon://activity-2" text="{i18n>lblGoodsIssue}" type="Emphasized" press="onGoodsIssuePress"/>
+				<Button icon="sap-icon://cause" text="{i18n>lblBPReceipt}" type="Emphasized" press="onBPReceiptPress"/>
 				<Button icon="sap-icon://error" text="{i18n>lblBreakdown}" type="Reject" press="onBreakdownPress"/>
 				<Button icon="sap-icon://sys-enter-2" text="{i18n>lblConfirmation}" type="Accept" press="onConfirmationPress"/>
 			</OverflowToolbar>
