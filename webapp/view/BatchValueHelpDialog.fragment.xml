@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<TableSelectDialog id="BatchValueHelpDialog" noDataText="{i18n>lblNoData}" title="{i18n>lblSelectBatch}" search=".handleBatchSearch"
+	<TableSelectDialog id="BatchValueHelpDialog" contentWidth="600px" noDataText="{i18n>lblNoData}" title="{i18n>lblSelectBatch}" search=".handleBatchSearch"
 		confirm=".handleBatchClose" cancel=".handleBatchClose" multiSelect="false"
 		items="{ path : 'oBatchModel>/results', sorter : { path : 'Sled', descending : false } }">
 		<ColumnListItem>

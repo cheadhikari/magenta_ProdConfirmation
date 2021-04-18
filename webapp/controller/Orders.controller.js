@@ -229,7 +229,7 @@ sap.ui.define([
 
 					var sSMessage = that._geti18nText("msgSMatDocPosted") + " : " + oResult.Matdoc + "/" + oResult.Matyear;
 					MessageBox.success(sSMessage);
-					
+
 					var oProdOrders = that._readProdOrders(tbOrders);
 
 					oProdOrders.then(function(oOrders) {
@@ -423,6 +423,13 @@ sap.ui.define([
 
 			var tbMatdoclines = this.byId("tbMatdoclines");
 			var oObject = aSelected[0].getObject();
+			var sGilines = oObject.Gilines;
+
+			if (!sGilines) {
+				MessageBox.error(this._geti18nText("msgENoData"));
+				return;
+			}
+
 			var sOrderid = oObject.Ordno;
 			var sPhase = oObject.Phase;
 			var sMoveType = '001';
@@ -577,8 +584,22 @@ sap.ui.define([
 				ProdOrder.Proddate = new Date();
 			}
 
-			this._postConfirmation(ProdOrder, oTable);
+			if (ProdOrder.Totwith < ProdOrder.Totreq && ProdOrder.Finalconf === true) {
 
+				var that = this;
+				sap.m.MessageBox.confirm(this._geti18nText("msgCGIIncomplete"), {
+					title: "Confirm",
+					onClose: function(sButton) {
+						if (sButton === MessageBox.Action.OK) {
+							that._postConfirmation(ProdOrder, oTable);
+						} else if (sButton === MessageBox.Action.CANCEL) {
+							// Do something
+						}
+					}
+				});
+			} else {
+				this._postConfirmation(ProdOrder, oTable);
+			}
 		},
 
 		handleScrapReasonValueHelp: function(oEvent) {
@@ -758,7 +779,27 @@ sap.ui.define([
 			this._pMoreInfoDialog.then(function(oDialog) {
 				oDialog.close();
 			});
+		},
+
+		onRefresh: function() {
+
+			var tbOrders = this.byId("tbOrders");
+			var oProdOrders = this._readProdOrders(tbOrders);
+
+			oProdOrders.then(function(oResult) {
+				var oProdOrdModel = new JSONModel(oResult);
+				tbOrders.setModel(oProdOrdModel, "oProdOrdModel");
+			});
+
+			oProdOrders.catch(function(oError) {
+				var oResponseText = JSON.parse(oError.responseText);
+				var sMessage = oResponseText.error.message.value;
+				MessageBox.error(sMessage);
+				return;
+			});
+
 		}
+
 	});
 
 });
