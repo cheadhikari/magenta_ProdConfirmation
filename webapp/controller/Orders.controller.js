@@ -583,17 +583,14 @@ sap.ui.define([
 			if (!ProdOrder.Proddate) {
 				ProdOrder.Proddate = new Date();
 			}
-
-			if (ProdOrder.Totwith < ProdOrder.Totreq && ProdOrder.Finalconf === true) {
-
+			
+			if (ProdOrder.Gilines === 'X' && ProdOrder.Giprc < 100.00 && ProdOrder.Finalconf === true) {
 				var that = this;
 				sap.m.MessageBox.confirm(this._geti18nText("msgCGIIncomplete"), {
 					title: "Confirm",
 					onClose: function(sButton) {
 						if (sButton === MessageBox.Action.OK) {
 							that._postConfirmation(ProdOrder, oTable);
-						} else if (sButton === MessageBox.Action.CANCEL) {
-							// Do something
 						}
 					}
 				});
