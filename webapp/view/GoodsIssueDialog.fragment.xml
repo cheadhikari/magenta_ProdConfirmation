@@ -13,6 +13,9 @@
 					<Text text="{i18n>lblStLoc}"/>
 				</Column>
 				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
+					<Text text="{i18n>lblBomQty}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
 					<Text text="{i18n>lblReqQty}"/>
 				</Column>
 				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
@@ -24,6 +27,8 @@
 				<Column demandPopin="true" minScreenWidth="Tablet">
 					<Text text="{i18n>lblQty}"/>
 				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="3rem">
+				</Column>
 			</columns>
 			<items>
 				<ColumnListItem>
@@ -31,10 +36,12 @@
 						<Text text="{oMatdocModel>Material}"/>
 						<Text text="{oMatdocModel>Matdesc}"/>
 						<Text text="{oMatdocModel>StgeLoc}"/>
+						<Text text="{oMatdocModel>Bomqty}"/>
 						<Text text="{oMatdocModel>Reqqty}"/>
 						<Text text="{oMatdocModel>Withqty}"/>
 						<Input id="inBatch" value="{oMatdocModel>Batch}" enabled="{= ${oMatdocModel>BatchMngd} === 'X' ? true : false }" showValueHelp="true" valueHelpRequest="handleBatchValueHelp"/>
-						<Input value="{oMatdocModel>EntryQnt}" type="Number" textAlign="End"/>
+						<Input id="inEntryQnt" value="{oMatdocModel>EntryQnt}" type="Number" textAlign="End"/>
+						<Button icon="sap-icon://compare" press="onWeighBridgePress"/>
 					</cells>
 				</ColumnListItem>
 			</items>

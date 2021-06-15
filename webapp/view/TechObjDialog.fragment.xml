@@ -1,0 +1,18 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+	<Dialog id="TechObjDialog" title="{i18n>lblSelectTechObj}" contentWidth="200px">
+		<VBox class="sapUiSmallMargin">
+			<f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+				<Label text="{i18n>lblTechObj}"></Label>
+				<Select id="selTechObj" forceSelection="false" items="{ path: 'oTechObjModel>/results', sorter: { path: 'Equnr' } }">
+					<core:Item key="{oTechObjModel>Equnr}" text="{oTechObjModel>Equnr} - {oTechObjModel>Eqktx}"/>
+				</Select>
+			</f:SimpleForm>
+		</VBox>
+		<beginButton>
+			<Button text="{i18n>lblSelect}" type="Emphasized" press="onSelectTechObj"></Button>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>lblClose}" press="onCloseTechObjDialog"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

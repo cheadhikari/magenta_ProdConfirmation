@@ -131,7 +131,7 @@ sap.ui.define([
 			});
 		},
 
-		_readMatdocitems: function(sOrderid, sPhase, sMoveType, oTable) {
+		_readMatdocitems: function(sOrderid, sPhase, sMoveType, sProddate, oTable) {
 
 			var oView = this.getView();
 			var oModel = oView.getModel("oModel");
@@ -140,10 +140,11 @@ sap.ui.define([
 			var oFilter1 = new Filter("Orderid", FilterOperator.EQ, sOrderid);
 			var oFilter2 = new Filter("Phase", FilterOperator.EQ, sPhase);
 			var oFilter3 = new Filter("MoveType", FilterOperator.EQ, sMoveType);
+			var oFilter4 = new Filter("Proddate", FilterOperator.EQ, sProddate);
 
 			return new Promise(function(resolve, reject) {
 				oModel.read("/MatdocitemSet", {
-					filters: [oFilter1, oFilter2, oFilter3],
+					filters: [oFilter1, oFilter2, oFilter3, oFilter4],
 					success: function(oResult) {
 						resolve(oResult);
 						oTable.setBusy(false);
@@ -156,11 +157,11 @@ sap.ui.define([
 			});
 		},
 
-		_readScrapReasons: function(sPlant) {
+		_readScrapReasons: function(sPlant, oDialog) {
 
 			var oView = this.getView();
 			var oModel = oView.getModel("oModel");
-			oView.setBusy(true);
+			oDialog.setBusy(true);
 
 			var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
 
@@ -169,21 +170,21 @@ sap.ui.define([
 					filters: [oFilter],
 					success: function(oResult) {
 						resolve(oResult);
-						oView.setBusy(false);
+						oDialog.setBusy(false);
 					},
 					error: function(oError) {
 						reject(oError);
-						oView.setBusy(false);
+						oDialog.setBusy(false);
 					}
 				});
 			});
 		},
 
-		_readBatches: function(sMaterial, sPlant, sStloc) {
+		_readBatches: function(sMaterial, sPlant, sStloc, oDialog) {
 
 			var oView = this.getView();
 			var oModel = oView.getModel("oModel");
-			oView.setBusy(true);
+			oDialog.setBusy(true);
 
 			var oFilter1 = new Filter("Material", FilterOperator.EQ, sMaterial);
 			var oFilter2 = new Filter("Plant", FilterOperator.EQ, sPlant);
@@ -194,15 +195,62 @@ sap.ui.define([
 					filters: [oFilter1, oFilter2, oFilter3],
 					success: function(oResult) {
 						resolve(oResult);
-						oView.setBusy(false);
+						oDialog.setBusy(false);
 					},
 					error: function(oError) {
 						reject(oError);
-						oView.setBusy(false);
+						oDialog.setBusy(false);
 					}
 				});
 			});
 
+		},
+
+		_readWeighBridge: function(sPlant, sTerminal, oDialog) {
+
+			var oView = this.getView();
+			var oModel = oView.getModel("oModel");
+			oDialog.setBusy(true);
+
+			var oFilter1 = new Filter("Plant", FilterOperator.EQ, sPlant);
+			var oFilter2 = new Filter("Terminal", FilterOperator.EQ, sTerminal);
+
+			return new Promise(function(resolve, reject) {
+				oModel.read("/WeighBridgeSet", {
+					filters: [oFilter1, oFilter2],
+					success: function(oResult) {
+						resolve(oResult);
+						oDialog.setBusy(false);
+					},
+					error: function(oError) {
+						reject(oError);
+						oDialog.setBusy(false);
+					}
+				});
+			});
+		},
+
+		_readTechObj: function(sPpsid, oDialog) {
+
+			var oView = this.getView();
+			var oModel = oView.getModel("oModel");
+			oDialog.setBusy(true);
+
+			var oFilter = new Filter("Ppsid", FilterOperator.EQ, sPpsid);
+
+			return new Promise(function(resolve, reject) {
+				oModel.read("/TechObjSet", {
+					filters: [oFilter],
+					success: function(oResult) {
+						resolve(oResult);
+						oDialog.setBusy(false);
+					},
+					error: function(oError) {
+						reject(oError);
+						oDialog.setBusy(false);
+					}
+				});
+			});
 		},
 
 		_postMatDoc: function(aData, oTable) {
@@ -376,19 +424,110 @@ sap.ui.define([
 
 		},
 
+		onScrapPress: function() {
+
+			var oView = this.getView();
+			var tbOrders = this.byId("tbOrders");
+			var aSelected = tbOrders.getSelectedContexts();
+
+			if (aSelected.length === 0) {
+				MessageBox.error(this._geti18nText("msgESelectItem"));
+				return;
+			}
+
+			if (aSelected.length > 1) {
+				MessageBox.error(this._geti18nText("msgEMultipleItems"));
+				return;
+			}
+
+			if (!this._pScrapDialog) {
+				this._pScrapDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.ScrapDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			var oBindingObject = aSelected[0].getObject();
+			var ScrapDialog = this.byId("ScrapDialog");
+			var inScrap = this.byId("inScrap");
+			var selScrapRsn = this.byId("selScrapRsn");
+
+			inScrap.setValue("");
+
+			var sPlant = oBindingObject.Plant;
+			var oScrapRsn = this._readScrapReasons(sPlant, ScrapDialog);
+
+			oScrapRsn.then(function(oResult) {
+				var oScrapRsnModel = new JSONModel(oResult);
+				selScrapRsn.setModel(oScrapRsnModel, "oScrapRsnModel");
+				selScrapRsn.setSelectedItem(null);
+			});
+
+			oScrapRsn.catch(function(oError) {
+				var oResponseText = JSON.parse(oError.responseText);
+				var sMessage = oResponseText.error.message.value;
+				MessageBox.error(sMessage);
+				return;
+			});
+
+			this._pScrapDialog.then(function(oDialog) {
+				oDialog.open();
+			});
+
+		},
+
 		onBreakdownPress: function() {
 
-			var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
-			var hashUrl = (oCrossAppNavigator && oCrossAppNavigator.hrefForExternal({
-				target: {
-					semanticObject: "MaintenanceJob",
-					action: "reportMalfunction"
-				}
-			}));
-			oCrossAppNavigator.toExternal({
-				target: {
-					shellHash: hashUrl
-				}
+			var oView = this.getView();
+			var tbOrders = this.byId("tbOrders");
+			var aSelected = tbOrders.getSelectedContexts();
+
+			if (aSelected.length === 0) {
+				MessageBox.error(this._geti18nText("msgESelectItem"));
+				return;
+			}
+
+			if (aSelected.length > 1) {
+				MessageBox.error(this._geti18nText("msgEMultipleItems"));
+				return;
+			}
+
+			var oObject = aSelected[0].getObject();
+			var sObjid = oObject.Objid;
+
+			if (!this._pTechObjDialog) {
+				this._pTechObjDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.TechObjDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			var TechObjDialog = this.byId("TechObjDialog");
+			var selTechObj = this.byId("selTechObj");
+			var oTechObj = this._readTechObj(sObjid, TechObjDialog);
+
+			oTechObj.then(function(oResult) {
+				var oTechObjModel = new JSONModel(oResult);
+				selTechObj.setModel(oTechObjModel, "oTechObjModel");
+			});
+
+			oTechObj.catch(function(oError) {
+				var oResponseText = JSON.parse(oError.responseText);
+				var sMessage = oResponseText.error.message.value;
+				MessageBox.error(sMessage);
+				return;
+			});
+
+			this._pTechObjDialog.then(function(oDialog) {
+				oDialog.open();
 			});
 
 		},
@@ -433,8 +572,12 @@ sap.ui.define([
 			var sOrderid = oObject.Ordno;
 			var sPhase = oObject.Phase;
 			var sMoveType = '001';
+			var sProddate = oObject.Proddate;
+			if (!sProddate) {
+				sProddate = new Date();
+			}
 
-			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, sMoveType, tbMatdoclines);
+			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, sMoveType, sProddate, tbMatdoclines);
 
 			oMatdocitems.then(function(oResult) {
 				var oMatdocModel = new JSONModel(oResult);
@@ -487,8 +630,12 @@ sap.ui.define([
 			var sOrderid = oObject.Ordno;
 			var sPhase = oObject.Phase;
 			var sMoveType = '002';
+			var sProddate = oObject.Proddate;
+			if (!sProddate) {
+				sProddate = new Date();
+			}
 
-			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, sMoveType, tbMatdoclines);
+			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, sMoveType, sProddate, tbMatdoclines);
 
 			oMatdocitems.then(function(oResult) {
 				var oMatdocModel = new JSONModel(oResult);
@@ -542,8 +689,8 @@ sap.ui.define([
 
 		onConfirmationPress: function() {
 
-			var oTable = this.byId("tbOrders");
-			var aSelected = oTable.getSelectedContexts();
+			var tbOrders = this.byId("tbOrders");
+			var aSelected = tbOrders.getSelectedContexts();
 
 			if (aSelected.length === 0) {
 				MessageBox.error(this._geti18nText("msgESelectItem"));
@@ -555,109 +702,38 @@ sap.ui.define([
 				return;
 			}
 
-			var ProdOrder = aSelected[0].getObject();
+			var oProdOrder = aSelected[0].getObject();
 
-			if (ProdOrder.Yield === "" || ProdOrder.Yield === "0") {
-				ProdOrder.Yield = "0.00";
+			if (oProdOrder.Yield === "" || oProdOrder.Yield === "0") {
+				oProdOrder.Yield = "0.00";
 			}
 
-			if (ProdOrder.Scrap === "" || ProdOrder.Scrap === "0") {
-				ProdOrder.Scrap = "0.00";
+			if (oProdOrder.Scrap === "" || oProdOrder.Scrap === "0") {
+				oProdOrder.Scrap = "0.00";
 			}
 
-			if (ProdOrder.Yield === "0.00" && ProdOrder.Scrap === "0.00" && !ProdOrder.Scraprsn) {
+			if (oProdOrder.Yield === "0.00") {
 				MessageBox.error(this._geti18nText("msgEBlankYield"));
 				return;
 			}
 
-			if (ProdOrder.Scrap > 0 && !ProdOrder.Scraprsn) {
-				MessageBox.error(this._geti18nText("msgEBlankScrapReason"));
-				return;
+			if (!oProdOrder.Proddate) {
+				oProdOrder.Proddate = new Date();
 			}
 
-			if (ProdOrder.Scrap === "0.00" && ProdOrder.Scraprsn) {
-				MessageBox.error(this._geti18nText("msgEBlankScrap"));
-				return;
-			}
-
-			if (!ProdOrder.Proddate) {
-				ProdOrder.Proddate = new Date();
-			}
-			
-			if (ProdOrder.Gilines === 'X' && ProdOrder.Giprc < 100.00 && ProdOrder.Finalconf === true) {
+			if (oProdOrder.Gilines === 'X' && oProdOrder.Giprc < 100.00 && oProdOrder.Finalconf === true) {
 				var that = this;
 				sap.m.MessageBox.confirm(this._geti18nText("msgCGIIncomplete"), {
 					title: "Confirm",
 					onClose: function(sButton) {
 						if (sButton === MessageBox.Action.OK) {
-							that._postConfirmation(ProdOrder, oTable);
+							that._postConfirmation(oProdOrder, tbOrders);
 						}
 					}
 				});
 			} else {
-				this._postConfirmation(ProdOrder, oTable);
+				this._postConfirmation(oProdOrder, tbOrders);
 			}
-		},
-
-		handleScrapReasonValueHelp: function(oEvent) {
-
-			this._pinScrapRsn = oEvent.getSource().getId();
-
-			var oButton = oEvent.getSource();
-			var oBindingContext = oButton.getBindingContext("oProdOrdModel");
-			var oBindingObject = oBindingContext.getObject();
-
-			var oView = this.getView();
-			if (!this._pScrapReasonDialog) {
-				this._pScrapReasonDialog = Fragment.load({
-					id: oView.getId(),
-					name: "com.magenta_ProdConfirmation.view.ScrapReasonValueHelpDialog",
-					controller: this
-				}).then(function(oDialog) {
-					oView.addDependent(oDialog);
-					return oDialog;
-				});
-			}
-
-			var sPlant = oBindingObject.Plant;
-			var oScrapRsn = this._readScrapReasons(sPlant);
-
-			var that = this;
-			oScrapRsn.then(function(oResult) {
-				var oScrapRsnModel = new JSONModel(oResult);
-				that._pScrapReasonDialog.then(function(oDialog) {
-					oDialog.setModel(oScrapRsnModel, "oScrapRsnModel");
-					oDialog.open();
-				});
-			});
-
-			oScrapRsn.catch(function(oError) {
-				return;
-			});
-
-		},
-
-		handleScrapReasonSearch: function(oEvent) {
-			var sValue = oEvent.getParameter("value");
-			var oFilter1 = new Filter("Plant", FilterOperator.Contains, sValue);
-			var oFilter2 = new Filter("Rsncode", FilterOperator.Contains, sValue);
-			var oFilter3 = new Filter("Rsntext", FilterOperator.Contains, sValue);
-			var aFilter = new Filter([oFilter1, oFilter2, oFilter3], false);
-			var oBinding = oEvent.getSource().getBinding("items");
-			oBinding.filter(aFilter);
-		},
-
-		handleScrapReasonClose: function(oEvent) {
-
-			var oItem = oEvent.getParameter("selectedItem");
-			var oContext = oItem.getBindingContext("oScrapRsnModel");
-			var oObject = oContext.getObject();
-
-			if (this._pinScrapRsn) {
-				var oInput = sap.ui.getCore().getElementById(this._pinScrapRsn);
-				oInput.setValue(oObject.Rsncode);
-			}
-
 		},
 
 		handleBatchValueHelp: function(oEvent) {
@@ -688,7 +764,7 @@ sap.ui.define([
 				return;
 			}
 
-			var oBatches = this._readBatches(sMaterial, sPlant, sStgeLoc);
+			var oBatches = this._readBatches(sMaterial, sPlant, sStgeLoc, this.byId("BatchValueHelpDialog"));
 
 			var that = this;
 			oBatches.then(function(oResult) {
@@ -726,6 +802,134 @@ sap.ui.define([
 				var oInput = sap.ui.getCore().getElementById(this._pinBatch);
 				oInput.setValue(oObject.Batch);
 			}
+
+		},
+
+		onWeighBridgePress: function(oEvent) {
+
+			var oView = this.getView();
+
+			var oButton = oEvent.getSource();
+			var oBindingContext = oButton.getBindingContext("oMatdocModel");
+			this._pGIPath = oBindingContext.getPath();
+			var oBindingObject = oBindingContext.getObject();
+			var sPlant = oBindingObject.Plant;
+
+			if (!this._pWeighBridgeDialog) {
+				this._pWeighBridgeDialog = Fragment.load({
+					id: oView.getId(),
+					name: "com.magenta_ProdConfirmation.view.WeighBridgeDialog",
+					controller: this
+				}).then(function(oDialog) {
+					oView.addDependent(oDialog);
+					return oDialog;
+				});
+			}
+
+			var WeighBridgeDialog = this.byId("WeighBridgeDialog");
+			var selTerminal = this.byId("selTerminal");
+			var oWeighBridge = this._readWeighBridge(sPlant, "", WeighBridgeDialog);
+
+			oWeighBridge.then(function(oResult) {
+				var oWeighBridgeModel = new JSONModel(oResult);
+				selTerminal.setModel(oWeighBridgeModel, "oWeighBridgeModel");
+			});
+
+			oWeighBridge.catch(function(oError) {
+				var oResponseText = JSON.parse(oError.responseText);
+				var sMessage = oResponseText.error.message.value;
+				MessageBox.error(sMessage);
+				return;
+			});
+
+			this._pWeighBridgeDialog.then(function(oDialog) {
+				oDialog.open();
+			});
+		},
+
+		onGetWeight: function() {
+
+			var selTerminal = this.byId("selTerminal");
+			var oItem = selTerminal.getSelectedItem();
+
+			if (!oItem) {
+				MessageBox.error(this._geti18nText("msgESelectTerminal"));
+				return;
+			}
+
+			var oBindingContext = oItem.getBindingContext("oWeighBridgeModel");
+			var oBindingObject = oBindingContext.getObject();
+			var tbMatdoclines = this.byId("tbMatdoclines");
+			var oMatdocModel = tbMatdoclines.getModel("oMatdocModel");
+			var oData = oMatdocModel.getProperty("/results");
+			var iIndex = this._getIndexFromPath(this._pGIPath);
+			oData[iIndex].EntryQnt = oBindingObject.Weight;
+			oMatdocModel.setProperty("/results", oData);
+			this.onCloseWeighBridgeDialog();
+		},
+
+		onSelectTechObj: function() {
+
+			var selTechObj = this.byId("selTechObj");
+			var oKey = selTechObj.getSelectedKey();
+			if (!oKey) {
+				MessageBox.error(this._geti18nText("msgESelectTechObj"));
+				return;
+			}
+
+			var sTechObj = oKey;
+			this.onCloseTechObjDialog();
+
+			var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
+			var hashUrl = (oCrossAppNavigator && oCrossAppNavigator.hrefForExternal({
+				target: {
+					semanticObject: "MaintenanceNotification",
+					action: "create_simple"
+				},
+				params: {
+					TechnicalObject: sTechObj,
+					NotificationType: "ZC"
+				}
+			}));
+			oCrossAppNavigator.toExternal({
+				target: {
+					shellHash: hashUrl
+				}
+			});
+
+		},
+
+		onPostScrap: function() {
+
+			var inScrap = this.byId("inScrap");
+			var sScrap = inScrap.getValue();
+			if (!sScrap) {
+				MessageBox.error(this._geti18nText("msgEBlankScrap"));
+				return;
+			}
+
+			var selScrapRsn = this.byId("selScrapRsn");
+			var oKey = selScrapRsn.getSelectedKey();
+			if (!oKey) {
+				MessageBox.error(this._geti18nText("msgEBlankScrapReason"));
+				return;
+			}
+
+			var tbOrders = this.byId("tbOrders");
+			var aSelected = tbOrders.getSelectedContexts();
+			var oProdOrder = aSelected[0].getObject();
+
+			oProdOrder.Yield = "0.00";
+			oProdOrder.Scrap = sScrap;
+			oProdOrder.Scraprsn = oKey;
+
+			if (!oProdOrder.Proddate) {
+				oProdOrder.Proddate = new Date();
+			}
+
+			this._postConfirmation(oProdOrder, tbOrders);
+
+			this.onCloseScrapDialog();
 
 		},
 
@@ -774,6 +978,24 @@ sap.ui.define([
 
 		onCloseMoreInfoDialog: function() {
 			this._pMoreInfoDialog.then(function(oDialog) {
+				oDialog.close();
+			});
+		},
+
+		onCloseWeighBridgeDialog: function() {
+			this._pWeighBridgeDialog.then(function(oDialog) {
+				oDialog.close();
+			});
+		},
+
+		onCloseTechObjDialog: function() {
+			this._pTechObjDialog.then(function(oDialog) {
+				oDialog.close();
+			});
+		},
+
+		onCloseScrapDialog: function() {
+			this._pScrapDialog.then(function(oDialog) {
 				oDialog.close();
 			});
 		},

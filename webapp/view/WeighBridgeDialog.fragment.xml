@@ -1,0 +1,18 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form">
+	<Dialog id="WeighBridgeDialog" title="{i18n>lblSelectTerminal}" contentWidth="100px">
+		<VBox class="sapUiSmallMargin">
+			<f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+				<Label text="{i18n>lblTerminal}"></Label>
+				<Select id="selTerminal" forceSelection="false" items="{ path: 'oWeighBridgeModel>/results', sorter: { path: 'Terminal' } }">
+					<core:Item key="{oWeighBridgeModel>Terminal}" text="{oWeighBridgeModel>Terminal}"/>
+				</Select>
+			</f:SimpleForm>
+		</VBox>
+		<beginButton>
+			<Button text="{i18n>lblSelect}" type="Emphasized" press="onGetWeight"></Button>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>lblClose}" press="onCloseWeighBridgeDialog"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>
