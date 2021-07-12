@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-	<Dialog id="GoodsIssueDialog" title="{i18n>lblLineItems}" contentWidth="1000px">
+	<Dialog id="GoodsIssueDialog" title="{i18n>lblGoodsIssueItems}" contentWidth="1000px">
 		<Table id="tbMatdoclines" items="{oMatdocModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
 			backgroundDesign="Transparent" mode="MultiSelect" sticky="ColumnHeaders">
 			<columns>
@@ -9,7 +9,7 @@
 				<Column demandPopin="true" minScreenWidth="50rem">
 					<Text text="{i18n>lblMatDesc}"/>
 				</Column>
-				<Column demandPopin="true" minScreenWidth="Tablet" width="4rem">
+				<Column demandPopin="true" minScreenWidth="50rem" width="4rem">
 					<Text text="{i18n>lblStLoc}"/>
 				</Column>
 				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
@@ -27,8 +27,7 @@
 				<Column demandPopin="true" minScreenWidth="Tablet">
 					<Text text="{i18n>lblQty}"/>
 				</Column>
-				<Column demandPopin="true" minScreenWidth="Tablet" width="3rem">
-				</Column>
+				<Column demandPopin="false" width="3rem"></Column>
 			</columns>
 			<items>
 				<ColumnListItem>
@@ -39,7 +38,8 @@
 						<Text text="{oMatdocModel>Bomqty}"/>
 						<Text text="{oMatdocModel>Reqqty}"/>
 						<Text text="{oMatdocModel>Withqty}"/>
-						<Input id="inBatch" value="{oMatdocModel>Batch}" enabled="{= ${oMatdocModel>BatchMngd} === 'X' ? true : false }" showValueHelp="true" valueHelpRequest="handleBatchValueHelp"/>
+						<Input id="inBatch" value="{oMatdocModel>Batch}" enabled="{= ${oMatdocModel>BatchMngd} === 'X' ? true : false }" showValueHelp="true"
+							valueHelpRequest="handleBatchValueHelp"/>
 						<Input id="inEntryQnt" value="{oMatdocModel>EntryQnt}" type="Number" textAlign="End"/>
 						<Button icon="sap-icon://compare" press="onWeighBridgePress"/>
 					</cells>

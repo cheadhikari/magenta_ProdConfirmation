@@ -253,6 +253,31 @@ sap.ui.define([
 			});
 		},
 
+		_readCombOrders: function(sOrdno, sYield, oDialog) {
+
+			var oView = this.getView();
+			var oModel = oView.getModel("oModel");
+			oDialog.setBusy(true);
+
+			var oFilter1 = new Filter("Ordno", FilterOperator.EQ, sOrdno);
+			var oFilter2 = new Filter("Yield", FilterOperator.EQ, sYield);
+
+			return new Promise(function(resolve, reject) {
+				oModel.read("/CombOrdItemSet", {
+					filters: [oFilter1, oFilter2],
+					success: function(oResult) {
+						resolve(oResult);
+						oDialog.setBusy(false);
+					},
+					error: function(oError) {
+						reject(oError);
+						oDialog.setBusy(false);
+					}
+				});
+			});
+
+		},
+
 		_postMatDoc: function(aData, oTable) {
 
 			var oView = this.getView();
@@ -318,10 +343,65 @@ sap.ui.define([
 			});
 		},
 
-		_postConfirmation: function(oData, oTable) {
+		_postConfirmation: function(oData, oTable, oProdOrder) {
 
 			var oView = this.getView();
 			var oModel = oView.getModel("oModel");
+
+			if (oData.Combined === "X") {
+
+				// var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
+				// var hashUrl = (oCrossAppNavigator && oCrossAppNavigator.hrefForExternal({
+				// 	target: {
+				// 		semanticObject: "ZPP_COR6N",
+				// 		action: "confirm"
+				// 	},
+				// 	params: {
+				// 		Aufnr: oData.Ordno,
+				// 		Vornr: oData.Phase,
+				// 		Lmnga: oData.Yield
+				// 	}
+				// }));
+				// oCrossAppNavigator.toExternal({
+				// 	target: {
+				// 		shellHash: hashUrl
+				// 	}
+				// });
+
+				if (!this._pCombOrdDialog) {
+					this._pCombOrdDialog = Fragment.load({
+						id: oView.getId(),
+						name: "com.magenta_ProdConfirmation.view.CombOrdDialog",
+						controller: this
+					}).then(function(oDialog) {
+						oView.addDependent(oDialog);
+						return oDialog;
+					});
+				}
+
+				var CombOrdDialog = this.byId("CombOrdDialog");
+				var tbCombOrdItems = this.byId("tbCombOrdItems");
+
+				var sOrdno = oProdOrder.Ordno;
+				var sYield = oProdOrder.Yield;
+
+				var oCombOrd = this._readCombOrders(sOrdno, sYield, CombOrdDialog);
+
+				oCombOrd.then(function(oResult) {
+					var oCombOrdItemModel = new JSONModel(oResult);
+					tbCombOrdItems.setModel(oCombOrdItemModel, "oCombOrdItemModel");
+				});
+
+				oCombOrd.catch(function(oError) {
+
+				});
+
+				this._pCombOrdDialog.then(function(oDialog) {
+					oDialog.open();
+				});
+
+				return;
+			}
 
 			oView.setBusy(true);
 
@@ -365,6 +445,70 @@ sap.ui.define([
 					}
 
 					MessageBox.error(sEMessage);
+				}
+			});
+		},
+
+		_postCombOrd: function(oCombOrdHead, aCombOrdItems, oDialog, oTable) {
+
+			var oView = this.getView();
+			var tbOrders = this.byId("tbOrders");
+			var oModel = oView.getModel("oModel");
+
+			oDialog.setBusy(true);
+
+			var oCombOrdHead = {
+				Ordno: oCombOrdHead.Ordno,
+				Phase: oCombOrdHead.Phase,
+				Yield: oCombOrdHead.Yield,
+				Proddate: oCombOrdHead.Proddate,
+				ToCombOrdItem: aCombOrdItems
+			};
+
+			var that = this;
+			oModel.create("/CombOrdHeadSet", oCombOrdHead, {
+				success: function(oResult) {
+
+					oDialog.setBusy(false);
+					var sSMessage = that._geti18nText("msgSOrderConfirmed") + " : " + oResult.Ordno;
+					MessageBox.success(sSMessage);
+
+					var oProdOrders = that._readProdOrders(tbOrders);
+
+					oProdOrders.then(function(oOrders) {
+						var oProdOrdModel = new JSONModel(oOrders);
+						tbOrders.setModel(oProdOrdModel, "oProdOrdModel");
+					});
+
+					oProdOrders.catch(function(oError) {
+
+					});
+
+					that._pCombOrdDialog.then(function(oCombOrdDialog) {
+						oCombOrdDialog.close();
+					});
+				},
+				error: function(oError) {
+					oDialog.setBusy(false);
+
+					var oMsg,
+						sEMessage;
+
+					try {
+
+						oMsg = JSON.parse(oError.responseText);
+						sEMessage = oMsg.error.message.value;
+
+					} catch (err) {
+
+						var oParser = new DOMParser();
+						var oXmlDoc = oParser.parseFromString(oError.responseText, "text/xml");
+						sEMessage = oXmlDoc.getElementsByTagName("message")[0].childNodes[0].nodeValue;
+
+					}
+
+					MessageBox.error(sEMessage);
+
 				}
 			});
 		},
@@ -637,9 +781,21 @@ sap.ui.define([
 
 			var oMatdocitems = this._readMatdocitems(sOrderid, sPhase, sMoveType, sProddate, tbMatdoclines);
 
+			var that = this;
 			oMatdocitems.then(function(oResult) {
+
+				if (oResult.results.length === 0) {
+					MessageBox.error(that._geti18nText("msgENoData"));
+					return;
+				}
+
+				that._pGoodsIssueDialog.then(function(oDialog) {
+					oDialog.open();
+				});
+
 				var oMatdocModel = new JSONModel(oResult);
 				tbMatdoclines.setModel(oMatdocModel, "oMatdocModel");
+
 			});
 
 			oMatdocitems.catch(function(oError) {
@@ -649,42 +805,6 @@ sap.ui.define([
 				return;
 			});
 
-			this._pGoodsIssueDialog.then(function(oDialog) {
-				oDialog.open();
-			});
-
-		},
-
-		onPostMatdoc: function() {
-
-			var oTable = this.byId("tbMatdoclines");
-			var aSelected = oTable.getSelectedContexts();
-
-			if (aSelected.length === 0) {
-				MessageBox.error(this._geti18nText("msgESelectItem"));
-				return;
-			}
-
-			var aMatDocitems = [];
-			var bQty = false;
-
-			aSelected.forEach(function(oLine) {
-
-				var oObj = oLine.getObject();
-
-				if (!oObj.EntryQnt) {
-					bQty = true;
-				}
-
-				aMatDocitems.push(oObj);
-			});
-
-			if (bQty) {
-				MessageBox.error(this._geti18nText("msgEBlankQty"));
-				return;
-			}
-
-			this._postMatDoc(aMatDocitems, oTable);
 		},
 
 		onConfirmationPress: function() {
@@ -722,17 +842,18 @@ sap.ui.define([
 			}
 
 			if (oProdOrder.Gilines === 'X' && oProdOrder.Giprc < 100.00 && oProdOrder.Finalconf === true) {
+
 				var that = this;
 				sap.m.MessageBox.confirm(this._geti18nText("msgCGIIncomplete"), {
 					title: "Confirm",
 					onClose: function(sButton) {
 						if (sButton === MessageBox.Action.OK) {
-							that._postConfirmation(oProdOrder, tbOrders);
+							that._postConfirmation(oProdOrder, tbOrders, oProdOrder);
 						}
 					}
 				});
 			} else {
-				this._postConfirmation(oProdOrder, tbOrders);
+				this._postConfirmation(oProdOrder, tbOrders, oProdOrder);
 			}
 		},
 
@@ -803,6 +924,38 @@ sap.ui.define([
 				oInput.setValue(oObject.Batch);
 			}
 
+		},
+
+		onPostMatdoc: function() {
+
+			var oTable = this.byId("tbMatdoclines");
+			var aSelected = oTable.getSelectedContexts();
+
+			if (aSelected.length === 0) {
+				MessageBox.error(this._geti18nText("msgESelectItem"));
+				return;
+			}
+
+			var aMatDocitems = [];
+			var bQty = false;
+
+			aSelected.forEach(function(oLine) {
+
+				var oObj = oLine.getObject();
+
+				if (!oObj.EntryQnt) {
+					bQty = true;
+				}
+
+				aMatDocitems.push(oObj);
+			});
+
+			if (bQty) {
+				MessageBox.error(this._geti18nText("msgEBlankQty"));
+				return;
+			}
+
+			this._postMatDoc(aMatDocitems, oTable);
 		},
 
 		onWeighBridgePress: function(oEvent) {
@@ -927,9 +1080,36 @@ sap.ui.define([
 				oProdOrder.Proddate = new Date();
 			}
 
-			this._postConfirmation(oProdOrder, tbOrders);
+			this._postConfirmation(oProdOrder, tbOrders, oProdOrder);
 
 			this.onCloseScrapDialog();
+
+		},
+
+		onPostCombOrd: function() {
+
+			var CombOrdDialog = this.byId("CombOrdDialog");
+			var tbOrders = this.byId("tbOrders");
+			var aSelected = tbOrders.getSelectedContexts();
+			var oCombOrdHead = aSelected[0].getObject();
+			var tbCombOrdItems = this.byId("tbCombOrdItems");
+			var oCombOrdItemModel = tbCombOrdItems.getModel("oCombOrdItemModel");
+			var aCombOrdItems = oCombOrdItemModel.getProperty("/results/");
+
+			var bQty = false;
+			aCombOrdItems.forEach(function(oItem) {
+
+				if (!oItem.Yield || oItem.Yield === "0.00" ) {
+					bQty = true;
+				}
+			});
+
+			if (bQty) {
+				MessageBox.error(this._geti18nText("msgEBlankQty"));
+				return;
+			}
+
+			this._postCombOrd(oCombOrdHead, aCombOrdItems, CombOrdDialog, tbOrders);
 
 		},
 
@@ -996,6 +1176,12 @@ sap.ui.define([
 
 		onCloseScrapDialog: function() {
 			this._pScrapDialog.then(function(oDialog) {
+				oDialog.close();
+			});
+		},
+
+		onCloseCombOrdDialog: function() {
+			this._pCombOrdDialog.then(function(oDialog) {
 				oDialog.close();
 			});
 		},

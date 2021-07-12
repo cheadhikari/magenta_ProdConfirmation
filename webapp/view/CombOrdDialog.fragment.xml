@@ -1,0 +1,49 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog id="CombOrdDialog" title="{i18n>lblCombOrdItems}" contentWidth="1000px">
+		<Table id="tbCombOrdItems" items="{oCombOrdItemModel>/results}" growing="true" growingThreshold="20" growingScrollToLoad="true"
+			backgroundDesign="Transparent" sticky="ColumnHeaders">
+			<columns>
+				<Column demandPopin="false" width="5rem">
+					<Text text="{i18n>lblOrdno}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="5rem">
+					<Text text="{i18n>lblMaterial}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="50rem">
+					<Text text="{i18n>lblMatDesc}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
+					<Text text="{i18n>lblConfQty}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
+					<Text text="{i18n>lblTotQty}"/>
+				</Column>
+				<Column demandPopin="true" minScreenWidth="Tablet" width="6rem" hAlign="End">
+					<Text text="{i18n>lblUom}"/>
+				</Column>
+				<Column demandPopin="false" width="6rem">
+					<Text text="{i18n>lblYield}"/>
+				</Column>
+			</columns>
+			<items>
+				<ColumnListItem>
+					<cells>
+						<Text text="{oCombOrdItemModel>Oriord}"/>
+						<Text text="{oCombOrdItemModel>Material}"/>
+						<Text text="{oCombOrdItemModel>Matdesc}"/>
+						<Text text="{oCombOrdItemModel>Confqty}"/>
+						<Text text="{oCombOrdItemModel>Totqty}"/>
+						<Text text="{oCombOrdItemModel>Uom}"/>
+						<Input id="inYield" value="{oCombOrdItemModel>Yield}" type="Number" textAlign="End"/>
+					</cells>
+				</ColumnListItem>
+			</items>
+		</Table>
+		<beginButton>
+			<Button text="{i18n>lblPost}" type="Emphasized" press="onPostCombOrd"></Button>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>lblClose}" press="onCloseCombOrdDialog"></Button>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>
