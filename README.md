@@ -1,3 +1,3 @@
 # magenta_ProdConfirmation
 Magenta Production Confirmation App
-Test
+This is a test message
